@@ -1,137 +1,78 @@
-Read address c: 0
-Execute: mem[0] -= mem[0]
-Result: mem[0] = 0
-Condition: 0 <= 0 (true)
-Jump to: 0
-[Press Enter to continue...]
-```
-
-## Performance & Limits
-
-### Default Limits
-
-- **Max Instructions**: 1,000,000 (prevent infinite loop hangs)
-- **Memory**: Uses sparse storage, theoretically unlimited
-- **Address Range**: Java int range (-2³¹ ~ 2³¹-1)
-
-### Performance Considerations
-
-- Sparse memory uses HashMap, O(1) lookup time
-- Instruction decoding uses streaming, space efficient
-- Suitable for teaching and experiments, not production
-
-## Troubleshooting
-
-### 1. Program Doesn't Stop
-
-**Cause**: Might be in infinite loop or missing halt instruction.
 # BS Java Interpreter
-**Solution**: 
-- Check if there's a jump to -1 instruction
-- Use debug mode to observe execution flow
-- Program auto-terminates after 1 million instructions
+
 Java implementation of the BS (Bitwise Subleq) interpreter with full debugging capabilities and bilingual support.
-### 2. Bitstream Parse Error
+
 > **Language Specification**: For complete BS language specification, see [Project Root README](../../README_EN.md)
-**Error Message**: "Bitstream length must be multiple of 5"
 
-**Solution**:
-- Check if input file is complete (only 0s and 1s)
-- Ensure bitstream length is correct (minimum 15 bits per instruction)
-
-### 3. Garbled Output
-
-**Cause**: Output byte value not in printable ASCII range.
-
-**Solution**:
-- Check the value in memory to be output
-- Use `mem[a] & 0xFF` to ensure 0-255 range
-
-### 4. Main Class Not Found
-
-**Error Message**: "Could not find or load main class BSMain"
-
-**Solution**:
-
-# Rebuild
-.\gradlew.bat clean build
-
-# Ensure correct classpath
-java -cp build\classes\java\main BSMain
+## Features
 
 - ✅ Full BS language support
-## Extension Development
+- ✅ Debug mode (step-by-step execution, memory inspection)
 - ✅ Bilingual interface (Chinese/English)
-### Adding New Languages
+- ✅ Read programs from file or command line
 - ✅ Detailed error messages
-Edit `Lang.java`, add new language code:
+- ✅ Execution statistics
+- ✅ Configurable execution limits
+
+## Quick Start
+
 ### Build Project
-```java
-private void loadMessages() {
-    if ("fr".equals(lang)) {  // French
-        messages.put("error.bitstream", "Erreur: ...");
-        // ...
-    }
-}
-```
+
 ```bash
-### Custom Memory Size
+cd Interpreter/Java
+.\gradlew.bat build     # Windows
+./gradlew build         # Linux/Mac
 ```
-Modify `MAX_INSTRUCTIONS` constant in `BSInterpreter.java`.
+
 ### Run Programs
-### Adding New I/O Operations
+
+#### Basic Usage
+
 ```bash
-Extend special address handling logic in `executeInstruction()` method of `BSInterpreter.java`.
+# Execute bitstream from command line
 java -cp build\classes\java\main BSMain -e <bitstream>
-## Test Files
+
 # Execute from file
-### test_infinite_loop.bs
-Simplest infinite loop: `000000000000000`
+java -cp build\classes\java\main BSMain <filename>
 
-### test_output_a.bs
-Output test program, demonstrates basic I/O operations.
+# Debug mode
+java -cp build\classes\java\main BSMain -d -e <bitstream>
 ```
-## Build Artifacts
+
+#### Examples
+
+```bash
+# Infinite loop example
 java -cp build\classes\java\main BSMain -e 000000000000000
-After compilation, generates:
-# Output test
-- `build/classes/java/main/` - Compiled .class files
-- `build/libs/` - JAR package
-- `build/reports/` - Build reports
 
-## Dependencies
+# Output test
+java -cp build\classes\java\main BSMain -e 100010000111111
+
+# Using test files
+java -cp build\classes\java\main BSMain test_infinite_loop.bs
+java -cp build\classes\java\main BSMain test_output_a.bs
 ```
-No external dependencies, uses only Java standard library.
+
+## Command Line Options
+
 | Option | Description |
-**Minimum Requirement**: Java 8+
+|--------|-------------|
+| `-e <bitstream>` | Execute bitstream string directly |
+| `-d, --debug` | Enable debug mode (step-by-step) |
 | `--lang <zh\|en>` | Set interface language (default: zh) |
 | `-h, --help` | Show help message |
 | `<filename>` | Read and execute program from file |
-Contributions welcome:
 
-- 🐛 Report bugs
-- ✨ Suggest new features
-- 📝 Improve documentation
-- 🚀 Performance optimization
-- 🌍 Add new language support
-
-## Related Resources
-
-- **Project Home**: [BS Language](../../README_EN.md)
-- **Language Specification**: [README_EN.md](../../README_EN.md#language-specification)
-- **Chinese Documentation**: [README.md](README.md)
 ## Environment Variables
 
 | Variable | Value | Description |
-See [LICENSE](../../LICENSE) file in project root directory.
+|----------|-------|-------------|
 | `BS_LANG` | `zh` / `en` | Set interface language |
 | `BS_DEBUG` | `1` | Enable verbose debug output |
 | `BS_VERBOSE` | `1` | Show execution statistics |
-**Tip**: First time user? Try this command:
+
+**Example:**
 ```bash
-java -cp build\classes\java\main BSMain -d -e 000000000000000
-```
-Experience debug mode and observe how the program executes!
 set BS_LANG=en
 set BS_DEBUG=1
 java -cp build\classes\java\main BSMain -e 000000000000000
@@ -206,77 +147,138 @@ When debug mode is enabled, the interpreter will:
 PC: 0
 Read address a: 0
 Read address b: 0
-
-This will show bit-by-bit analysis and decoding results of bitstreams.
-
-### Switch Test Tool Language
-
-```bash
-java -cp build\classes\java\main TestDecoding --lang zh
+Read address c: 0
+Execute: mem[0] -= mem[0]
+Result: mem[0] = 0
+Condition: 0 <= 0 (true)
+Jump to: 0
+[Press Enter to continue...]
 ```
 
-## Technical Notes
+## Performance & Limits
 
-### Address Decoding Algorithm
+### Default Limits
 
-1. Read 4 data bits
-2. Read 1 link bit
-3. If link=1, shift accumulated value left and continue
-4. If link=0, address complete
-5. If all bits are 1s, return -1
+- **Max Instructions**: 1,000,000 (prevent infinite loop hangs)
+- **Memory**: Uses sparse storage, theoretically unlimited
+- **Address Range**: Java int range (-2³¹ ~ 2³¹-1)
 
-### Memory Model
+### Performance Considerations
 
-- Uses sparse memory (HashMap)
-- Uninitialized addresses default to 0
-- Supports negative address indexing (for special operations)
-
-### Program Counter
-
-- PC starts at 0
-- Jump instructions set PC directly
-- PC increments for sequential execution
-
-## Language Selection
-
-This interpreter defaults to **Chinese** output, which is more friendly for Chinese developers. To switch to English:
-
-**Method 1: Command line argument**
-```bash
-java -cp build\classes\java\main BSMain --lang en -e 000000000000000
-```
-
-**Method 2: Environment variable**
-```bash
-set BS_LANG=en
-java -cp build\classes\java\main BSMain -e 000000000000000
-```
+- Sparse memory uses HashMap, O(1) lookup time
+- Instruction decoding uses streaming, space efficient
+- Suitable for teaching and experiments, not production
 
 ## Troubleshooting
 
-### Common Errors
+### 1. Program Doesn't Stop
 
-1. **Bitstream length not multiple of 5**
-   - Check if input file is complete
-   - Use debug mode to see parsing process
+**Cause**: Might be in infinite loop or missing halt instruction.
 
-2. **Program doesn't stop**
-   - Check if there's a halt instruction (c=-1)
-   - Default limit: 1 million instructions
+**Solution**: 
+- Check if there's a jump to -1 instruction
+- Use debug mode to observe execution flow
+- Program auto-terminates after 1 million instructions
 
-3. **Output not as expected**
-   - Use `-d` flag to see detailed execution
-   - Check memory initial values and instruction order
+### 2. Bitstream Parse Error
+
+**Error Message**: "Bitstream length must be multiple of 5"
+
+**Solution**:
+- Check if input file is complete (only 0s and 1s)
+- Ensure bitstream length is correct (minimum 15 bits per instruction)
+
+### 3. Garbled Output
+
+**Cause**: Output byte value not in printable ASCII range.
+
+**Solution**:
+- Check the value in memory to be output
+- Use `mem[a] & 0xFF` to ensure 0-255 range
+
+### 4. Main Class Not Found
+
+**Error Message**: "Could not find or load main class BSMain"
+
+**Solution**:
+```bash
+# Rebuild
+.\gradlew.bat clean build
+
+# Ensure correct classpath
+java -cp build\classes\java\main BSMain
+```
+
+## Extension Development
+
+### Adding New Languages
+
+Edit `Lang.java`, add new language code:
+
+```java
+private void loadMessages() {
+    if ("fr".equals(lang)) {  // French
+        messages.put("error.bitstream", "Erreur: ...");
+        // ...
+    }
+}
+```
+
+### Custom Memory Size
+
+Modify `MAX_INSTRUCTIONS` constant in `BSInterpreter.java`.
+
+### Adding New I/O Operations
+
+Extend special address handling logic in `executeInstruction()` method of `BSInterpreter.java`.
+
+## Test Files
+
+### test_infinite_loop.bs
+Simplest infinite loop: `000000000000000`
+
+### test_output_a.bs
+Output test program, demonstrates basic I/O operations.
+
+## Build Artifacts
+
+After compilation, generates:
+
+- `build/classes/java/main/` - Compiled .class files
+- `build/libs/` - JAR package
+- `build/reports/` - Build reports
+
+## Dependencies
+
+No external dependencies, uses only Java standard library.
+
+**Minimum Requirement**: Java 8+
 
 ## Contributing
 
-Issues and improvement suggestions are welcome!
+Contributions welcome:
+
+- 🐛 Report bugs
+- ✨ Suggest new features
+- 📝 Improve documentation
+- 🚀 Performance optimization
+- 🌍 Add new language support
+
+## Related Resources
+
+- **Project Home**: [BS Language](../../README_EN.md)
+- **Language Specification**: [README_EN.md](../../README_EN.md#language-specification)
+- **Chinese Documentation**: [README.md](README.md)
 
 ## License
 
-See LICENSE file in project root directory.
+See [LICENSE](../../LICENSE) file in project root directory.
 
 ---
 
-**Note:** This is an experimental language project for exploring minimalist language design.
+**Tip**: First time user? Try this command:
+```bash
+java -cp build\classes\java\main BSMain -d -e 000000000000000
+```
+Experience debug mode and observe how the program executes!
 
