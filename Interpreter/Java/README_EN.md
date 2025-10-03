@@ -1,5 +1,7 @@
 # BS Java Interpreter
 
+[中文](README.md) | English
+
 Java implementation of the BS (Bitwise Subleq) interpreter with full debugging capabilities and bilingual support.
 
 > **Language Specification**: For complete BS language specification, see [Project Root README](../../README_EN.md)
@@ -281,4 +283,3 @@ See [LICENSE](../../LICENSE) file in project root directory.
 java -cp build\classes\java\main BSMain -d -e 000000000000000
 ```
 Experience debug mode and observe how the program executes!
-

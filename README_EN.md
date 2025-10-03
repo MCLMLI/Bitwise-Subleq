@@ -1,5 +1,7 @@
 # BS (Bitwise Subleq)
 
+[中文](README.md) | English
+
 **A minimalist Turing-complete programming language using only binary encoding**
 
 BS (Bitwise Subleq) is an experimental programming language that achieves Turing completeness with the most minimal design possible: a two-character alphabet {0, 1}, self-terminating address encoding, and a single instruction (Subleq). It serves as a powerful tool for studying computational theory and the essence of programming.
@@ -225,4 +227,3 @@ This project is open source. See [LICENSE](LICENSE) file for details.
 **BS Language** - *Exploring the limits of computational minimalism*
 
 *"Simplicity is the ultimate sophistication." - Leonardo da Vinci*
-
