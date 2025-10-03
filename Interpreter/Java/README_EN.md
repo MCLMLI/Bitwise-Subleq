@@ -4,7 +4,7 @@ English | [中文](README.md)
 
 Java implementation of the BS (Bitwise Subleq) interpreter.
 
-> 📖 **Full Language Specification**: See [Project Root README](../../README_EN.md) 
+> 📖 **Full Language Specification**: See [Project Root README](../../README_EN.md)
 
 ## Quick Start
 

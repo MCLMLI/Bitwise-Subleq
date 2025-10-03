@@ -4,7 +4,7 @@
 
 Java 实现的 BS (Bitwise Subleq) 解释器。
 
-> 📖 **完整语言规范**: 请参阅 [项目根目录 README](../../README.md) 
+> 📖 **完整语言规范**: 请参阅 [项目根目录 README](../../README.md)
 
 ## 快速开始
 
