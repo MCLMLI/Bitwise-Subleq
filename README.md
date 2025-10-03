@@ -121,13 +121,6 @@ else
 
 **位置**: `Interpreter/Java/`
 
-**快速开始**:
-```bash
-cd Interpreter/Java
-.\gradlew.bat build              # Windows
-java -cp build\classes\java\main BSMain -e 000000000000000
-```
-
 详细用法请参阅 [Java README](Interpreter/Java/README.md)。
 
 ### 未来实现
