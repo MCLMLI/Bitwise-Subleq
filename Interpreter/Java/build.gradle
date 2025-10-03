@@ -1,0 +1,32 @@
+plugins {
+    id 'java'
+}
+
+group = 'MCLMLI'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// 配置 JAR 任务，使其可执行
+jar {
+    manifest {
+        attributes(
+            'Main-Class': 'BSMain',
+            'Implementation-Title': 'BS (Bitwise Subleq) Interpreter',
+            'Implementation-Version': version,
+            'Created-By': 'MCLMLI'
+        )
+    }
+}
