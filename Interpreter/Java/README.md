@@ -1,5 +1,7 @@
 # BS Java 解释器
 
+中文 | [English](README_EN.md)
+
 Java 实现的 BS (Bitwise Subleq) 解释器，具有完整的调试功能和双语支持。
 
 > **语言规范**: 完整的 BS 语言规范请参阅 [项目根目录 README](../../README.md)
