@@ -121,13 +121,6 @@ A full-featured interpreter with debugging support.
 
 **Location**: `Interpreter/Java/`
 
-**Quick Start**:
-```bash
-cd Interpreter/Java
-.\gradlew.bat build              # Windows
-java -cp build\classes\java\main BSMain -e 000000000000000
-```
-
 See [Java README](Interpreter/Java/README.md) for detailed usage.
 
 ### Future Implementations
