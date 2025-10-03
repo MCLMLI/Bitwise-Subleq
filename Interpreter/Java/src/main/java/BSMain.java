@@ -20,6 +20,12 @@ public class BSMain {
             return;
         }
 
+        // 检查帮助参数
+        if (args[0].equals("-h") || args[0].equals("--help")) {
+            printUsage();
+            return;
+        }
+
         try {
             String bitstream;
             boolean debug = System.getenv("BS_DEBUG") != null || System.getenv("BS_VERBOSE") != null;
@@ -32,6 +38,12 @@ public class BSMain {
             }
 
             if (argOffset >= args.length) {
+                printUsage();
+                return;
+            }
+
+            // 再次检查帮助参数（在 --lang 之后）
+            if (args[argOffset].equals("-h") || args[argOffset].equals("--help")) {
                 printUsage();
                 return;
             }
