@@ -153,7 +153,14 @@ public class BSInterpreter {
         // 1. 检查a段输入功能位 / Check a segment input function bit
         if (instr.aFunc) {
             int input = System.in.read();
-            if (input == -1) input = 0;
+            if (input == -1) {
+                // EOF encountered - treat as 0 and set halt flag
+                input = 0;
+                if (debug) System.err.println("  " + Lang.get(
+                    "警告：遇到输入流结束（EOF），将作为0处理",
+                    "Warning: EOF encountered, treating as 0"
+                ));
+            }
             writeMem(instr.a, input);
             if (debug) System.err.println("  " + Lang.get(
                 "输入：读取字节 " + input + " 到地址 " + instr.a,

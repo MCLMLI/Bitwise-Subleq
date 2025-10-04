@@ -192,6 +192,80 @@ Function bits provide I/O and control operations without relying on special addr
 # c segment function bit=1: halt
 ```
 
+**Running:**
+```bash
+# Use pipe input (recommended)
+echo A | java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+
+# Or use file input
+echo ABC > input.txt
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -f program.bs < input.txt
+```
+
+**⚠️ Important: Line Buffering of Input Stream**
+
+BS programs read byte streams from standard input. **Standard input is line-buffered**, which means:
+
+**Why does input appear "merged"?**
+```bash
+# Interactive execution example
+> java -jar interpreter.jar -f test.bs
+> 123[Enter]
+# Output: 123
+
+# You might expect: program pauses 3 times, waiting for 1 character each time
+# What actually happens: when you press Enter, the entire line "123\n" enters the buffer,
+#                        the program's 3 read() calls sequentially read '1', '2', '3', without pausing
+```
+
+**Reason:**
+- When you type `123` and press Enter, the entire line (including newline) is placed in the input buffer
+- Each `System.in.read()` call by the program is an independent **blocking call**
+- But it only blocks when the buffer is **empty**
+- If the buffer already has data, `read()` returns **immediately**, without re-prompting the user
+
+**Example Comparison:**
+
+```bash
+# Case 1: Interactive input (appears "merged")
+> bs test.bs
+> 2323[Enter]
+Output: 232
+# Explanation: '2', '3', '2' read sequentially from buffer, halts after 3rd character
+
+# Case 2: Piped input (expected behavior)
+> echo ABC | bs test.bs
+Output: ABC
+# Explanation: entire string is in buffer, program reads sequentially
+
+# Case 3: Character-by-character input (requires special handling)
+> # Cannot achieve "pause and ask each time" in most terminals
+> # Because standard input is line-buffered
+```
+
+**EOF Handling:**
+```bash
+# When input stream ends (EOF)
+> bs test.bs
+> 1[Enter]
+Output: 1
+# Reads: '1', '\n', EOF (converted to 0)
+# If program expects 3 characters, 3rd read encounters EOF
+
+# Correct way: use pipe or redirection
+> echo ABC | bs test.bs
+# Reads: 'A', 'B', 'C', '\n', EOF
+
+# Windows without newline
+> echo|set /p="ABC" | bs test.bs
+# Reads: 'A', 'B', 'C', EOF
+```
+
+**Summary:**
+- BS language input operations are **blocking byte stream reads**, this is standard behavior
+- Input appears "merged" due to **line buffering**, not a bug
+- If you need true "character-by-character interaction", you need special terminal mode (raw mode), which is beyond standard BS language specification
+
 #### Multi-segment Address Example
 ```
 000111 001110 000010 000010
