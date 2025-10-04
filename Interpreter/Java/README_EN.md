@@ -8,36 +8,42 @@ Java implementation of the BS (Bitwise Subleq) interpreter, supporting the new 6
 
 ## Quick Start
 
-### Compile and Run from Source
+### 📦 Recommended: Use Pre-compiled JAR File
+
+Download the latest JAR file from the [Releases](https://github.com/your-username/Bitwise-Subleq/releases) page.
 
 ```bash
-cd Interpreter/Java/src/main/java
-javac -encoding UTF-8 *.java
-java BSMain -e "000010000010000010"    # Test halt instruction
+# Run directly after download
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+
+# View help message
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar --help
+
+# Run program from file
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar program.bs
+
+# Enable debug mode
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -d -e "000010000010000010"
 ```
 
 ### Usage Examples
 
 ```bash
-# Immediate halt (c segment function bit=1)
-java BSMain -e "000010000010000010"
-
-# Debug mode with detailed information
-java BSMain -d -e "000010000010000010"
-
-# Run from file
-java BSMain program.bs
+# Immediate halt (all segment function bits=1, executed in a→b→c order)
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
 
 # Input/output test (interactive)
-java BSMain -e "000110000110000010"
+# a segment input → b segment output updated memory → c segment halt
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+# Input a character, program will immediately output that character then halt
 ```
 
 ## Command Line Options
 
 ```
 Usage:
-  java BSMain [options] <filename>
-  java BSMain [options] -e <bitstream>
+  java -jar Bitwise-Subleq-Interpreter-Java-x.x.x.jar [options] <filename>
+  java -jar Bitwise-Subleq-Interpreter-Java-x.x.x.jar [options] -e <bitstream>
 
 Options:
   -h, --help              Show help message
@@ -50,9 +56,9 @@ Options:
 ## New Encoding Format
 
 Each address segment consists of 6 bits: `[dddd][s][l]`
-- **dddd**: 4 data bits
-- **s**: Function bit (0=discard, 1=valid)
-- **l**: Link bit (0=end, 1=continue)
+- **dddd**: 4 data bits (always accumulated to address value)
+- **s**: Function bit (not data, only marks function)
+- **l**: Link bit (not data, controls continuation)
 
 ### Function Bit Actions
 
@@ -61,6 +67,8 @@ Each address segment consists of 6 bits: `[dddd][s][l]`
 | a segment | Input | Read 1 byte from stdin to mem[a] |
 | b segment | Output | Output low 8 bits of mem[b] to stdout |
 | c segment | Halt | Immediately terminate program |
+
+**Important**: When multiple segments in an instruction have function bits, they execute in **a → b → c** order.
 
 ### Encoding Examples
 
@@ -71,8 +79,8 @@ Each address segment consists of 6 bits: `[dddd][s][l]`
 000110 = 0001(data) 1(function) 0(link)
          address=1, has function bit
 
-010011 = 0100(data) 1(function) 1(link)
-         Error! s=1 and l=1, treated as invalid
+000111 = 0001(data) 1(function) 1(link)
+         Error! s=1 and l=1, treated as no function bit, continue reading next segment
 ```
 
 ## Debug Mode
@@ -84,45 +92,36 @@ Debug mode displays:
 - Input/output operation details
 
 ```bash
-java BSMain -d -e "000010000010000010"
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -d -e "000010000010000010"
 ```
 
 Example output:
 ```
-Loaded instruction 0: a=0[], b=0[], c=0[HALT]
+Loaded instruction 0: a=0[IN], b=0[OUT], c=0[HALT]
 Loaded 1 instructions
 Starting execution of 1 instructions...
 
-PC=0, Instr: a=0, b=0, c=0[HALT]
+PC=0, Instr: a=0[IN], b=0[OUT], c=0[HALT]
   Before: mem[0]=0, mem[0]=0
+  INPUT: read byte 65 to address 0
+  OUTPUT: wrote byte 65 ('A') from address 0
   HALT (c function bit)
 
 Execution finished. Total instructions: 1
 ```
 
-## Building JAR
+## Build from Source (Advanced Users)
 
-To generate a standalone JAR file:
+If you need to modify the source code or build from source:
 
 ```bash
-cd Interpreter/Java
-.\gradlew.bat build     # Windows
-./gradlew build         # Linux/Mac
-
-# JAR file location
-build/libs/Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar
+cd Interpreter/Java/src/main/java
+javac -encoding UTF-8 *.java
+java BSMain -e "000010000010000010"
 ```
-
-## Technical Features
-
-- ✅ New 6-bit encoding format support
-- ✅ Function bit mechanism (input/output/halt)
-- ✅ Sparse memory implementation (HashMap)
-- ✅ Detailed debug output
-- ✅ Bilingual support (Chinese/English)
-- ✅ Self-terminating address parsing
-- ✅ Error handling and validation
 
 ## License
 
-MIT License - See [LICENSE](../../LICENSE) file in project root
+This project is licensed under the [GNU Affero General Public License v3.0](../../LICENSE).
+
+By using this software, you agree to comply with all terms of the AGPLv3 license.

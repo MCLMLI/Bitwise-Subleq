@@ -145,14 +145,12 @@ public class BSInterpreter {
     }
 
     private void executeInstruction(Instruction instr) throws IOException {
-        // 检查c段停机功能位 / Check c segment halt function bit
-        if (instr.cFunc) {
-            if (debug) System.err.println("  " + Lang.get("停机（c功能位）", "HALT (c function bit)"));
-            halted = true;
-            return;
-        }
+        boolean hasAnyFunction = instr.aFunc || instr.bFunc || instr.cFunc;
 
-        // 检查a段输入功能位 / Check a segment input function bit
+        // 按顺序执行功能位：a段（输入）→ b段（输出）→ c段（停机）
+        // Execute function bits in order: a (input) → b (output) → c (halt)
+
+        // 1. 检查a段输入功能位 / Check a segment input function bit
         if (instr.aFunc) {
             int input = System.in.read();
             if (input == -1) input = 0;
@@ -161,11 +159,9 @@ public class BSInterpreter {
                 "输入：读取字节 " + input + " 到地址 " + instr.a,
                 "INPUT: read byte " + input + " to address " + instr.a
             ));
-            pc++;
-            return;
         }
 
-        // 检查b段输出功能位 / Check b segment output function bit
+        // 2. 检查b段输出功能位 / Check b segment output function bit
         if (instr.bFunc) {
             int value = readMem(instr.b);
             System.out.write(value & 0xFF);
@@ -174,6 +170,18 @@ public class BSInterpreter {
                 "输出：写入字节 " + (value & 0xFF) + " ('" + (char)(value & 0xFF) + "') 从地址 " + instr.b,
                 "OUTPUT: wrote byte " + (value & 0xFF) + " ('" + (char)(value & 0xFF) + "') from address " + instr.b
             ));
+        }
+
+        // 3. 检查c段停机功能位 / Check c segment halt function bit
+        if (instr.cFunc) {
+            if (debug) System.err.println("  " + Lang.get("停机（c功能位）", "HALT (c function bit)"));
+            halted = true;
+            return;
+        }
+
+        // 如果有任何功能位被执行，则只递增PC，不执行正常的Subleq指令
+        // If any function bit was executed, just increment PC, don't execute normal Subleq
+        if (hasAnyFunction) {
             pc++;
             return;
         }

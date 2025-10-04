@@ -6,6 +6,13 @@
 
 BS (Bitwise Subleq) 是一门实验性编程语言，以最极简的设计实现图灵完备：双字符字母表 {0, 1}、自终止地址编码和单指令架构（Subleq）。它是研究计算理论与编程本质的有力工具。
 
+## 目录
+
+- [语言概述](#语言概述)
+- [语言规范](#语言规范)
+- [实现](#实现)
+- [许可证](#许可证)
+
 ## 语言概述
 
 ### 核心特性
@@ -181,96 +188,31 @@ else
 # 功能: 输入到mem[19]，输出mem[0]，停机
 ```
 
-## 实现版本
+## 实现
 
 ### Java 解释器
 
-功能完整的解释器，支持调试模式和新的功能位编码。
+我们提供了功能完整的 Java 解释器实现。
 
-**位置**: `Interpreter/Java/`
+📦 **推荐：使用预编译版本**
 
-**快速开始**:
+从 [Releases](https://github.com/your-username/Bitwise-Subleq/releases) 页面下载最新的 `Bitwise-Subleq-Interpreter-Java-x.x.x.jar`
+
 ```bash
-cd Interpreter/Java/src/main/java
-javac -encoding UTF-8 *.java
-java BSMain -e "000010000010000010"  # 测试停机
-java BSMain -d -e "你的比特流"        # 调试模式
+# 下载后直接运行
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+
+# 查看帮助
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar --help
 ```
 
-详细用法请参阅 [Java README](Interpreter/Java/README.md)。
-
-## 应用场景
-
-### 教育用途
-
-- **计算理论**: 用最少组件演示图灵完备性
-- **编译器设计**: 研究指令编码和解码
-- **算法设计**: 在约束下培养创造性问题解决能力
-
-### 研究用途
-
-- **极简计算**: 探索计算极简主义的边界
-- **编码理论**: 研究自终止可变长度编码
-- **理论计算机科学**: 研究Subleq架构变体
-
-### 艺术用途
-
-- **深奥编程**: 加入极简语言家族（Brainfuck、Malbolge等）
-- **二进制艺术**: 用可执行代码创建视觉模式
-- **生成艺术**: 利用计算约束进行创意输出
-
-## 语言对比
-
-| 特性 | BS | Brainfuck | OISC | 机器码 |
-|------|----|-----------|----- |--------|
-| 字符集大小 | 2 | 8 | 可变 | 256 |
-| 指令数 | 1 | 8 | 1 | 100+ |
-| 地址编码 | 变长(6位块) | 固定 | 固定 | 固定 |
-| I/O方式 | 功能位 | 专用指令 | 特殊地址 | 专用指令 |
-| 图灵完备 | ✓ | ✓ | ✓ | ✓ |
-
-## 技术优势
-
-1. **最小化解析**: 只需识别6位块
-2. **自描述**: 地址长度由链接位决定
-3. **功能位机制**: 不占用地址空间，明确的操作标记
-4. **紧凑表示**: 小地址值用6位表示，大地址值可扩展
-5. **无界地址**: 没有人为的内存限制
-6. **硬件友好**: 易于在数字电路中实现
-
-## 贡献指南
-
-我们欢迎各种形式的贡献：
-
-- **新实现**: 用其他语言编写解释器
-- **示例程序**: 创建有趣的BS程序
-- **优化**: 提高性能或减小代码大小
-- **文档**: 改进解释和教程
-- **工具**: 汇编器、调试器、可视化工具
-
-## 项目结构
-
-```
-Bitwise-Subleq/
-├── README.md           # 本文件（中文）
-├── README_EN.md        # 英文文档
-├── LICENSE             # 许可证信息
-└── Interpreter/        # 语言实现
-    └── Java/           # Java解释器
-        ├── README.md   # 实现文档（中文）
-        ├── README_EN.md # 实现文档（英文）
-        └── src/        # 源代码
-```
+📖 详细文档：[Java解释器 README](Interpreter/Java/README.md)
 
 ## 许可证
 
-本项目采用 GNU Affero General Public License v3.0 许可证 - 详见 [LICENSE](LICENSE) 文件
-
-## 联系方式
-
-- **Issues**: 在GitHub上提交问题
-- **Pull Requests**: 欢迎贡献代码
+本项目采用 [GNU Affero General Public License v3.0](LICENSE) 开源。
 
 ---
 
-**BS (Bitwise Subleq)** - 探索计算的本质，从0和1开始。
+**© 2025 BS (Bitwise Subleq) Project**  
+使用本软件即表示您同意遵守 AGPLv3 许可证的所有条款。

@@ -6,6 +6,13 @@
 
 BS (Bitwise Subleq) is an experimental programming language that achieves Turing completeness with the most minimalist design: a two-character alphabet {0, 1}, self-terminating address encoding, and a single-instruction architecture (Subleq). It is a powerful tool for studying computational theory and the essence of programming.
 
+## Table of Contents
+
+- [Language Overview](#language-overview)
+- [Language Specification](#language-specification)
+- [Implementations](#implementations)
+- [License](#license)
+
 ## Language Overview
 
 ### Core Features
@@ -185,92 +192,27 @@ Function bits provide I/O and control operations without relying on special addr
 
 ### Java Interpreter
 
-Full-featured interpreter with debug mode and new function bit encoding support.
+We provide a fully functional Java interpreter implementation.
 
-**Location**: `Interpreter/Java/`
+📦 **Recommended: Use Pre-compiled Version**
 
-**Quick Start**:
+Download the latest `Bitwise-Subleq-Interpreter-Java-x.x.x.jar` from the [Releases](https://github.com/your-username/Bitwise-Subleq/releases) page.
+
 ```bash
-cd Interpreter/Java/src/main/java
-javac -encoding UTF-8 *.java
-java BSMain -e "000010000010000010"  # Test halt
-java BSMain -d -e "your_bitstream"   # Debug mode
+# Run directly after download
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+
+# View help
+java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar --help
 ```
 
-For detailed usage, see [Java README](Interpreter/Java/README_EN.md).
-
-## Use Cases
-
-### Educational Uses
-
-- **Computational Theory**: Demonstrate Turing completeness with minimal components
-- **Compiler Design**: Study instruction encoding and decoding
-- **Algorithm Design**: Foster creative problem-solving under constraints
-
-### Research Uses
-
-- **Minimalist Computing**: Explore the boundaries of computational minimalism
-- **Coding Theory**: Study self-terminating variable-length encoding
-- **Theoretical Computer Science**: Research Subleq architecture variants
-
-### Artistic Uses
-
-- **Esoteric Programming**: Join the minimalist language family (Brainfuck, Malbolge, etc.)
-- **Binary Art**: Create visual patterns with executable code
-- **Generative Art**: Creative output using computational constraints
-
-## Language Comparison
-
-| Feature | BS | Brainfuck | OISC | Machine Code |
-|---------|----|-----------|----- |--------------|
-| Alphabet Size | 2 | 8 | Variable | 256 |
-| Instruction Count | 1 | 8 | 1 | 100+ |
-| Address Encoding | Variable (6-bit blocks) | Fixed | Fixed | Fixed |
-| I/O Method | Function bits | Dedicated instructions | Special addresses | Dedicated instructions |
-| Turing Complete | ✓ | ✓ | ✓ | ✓ |
-
-## Technical Advantages
-
-1. **Minimal Parsing**: Only need to recognize 6-bit blocks
-2. **Self-Describing**: Address length determined by link bits
-3. **Function Bit Mechanism**: Doesn't occupy address space, explicit operation markers
-4. **Compact Representation**: Small addresses use 6 bits, large addresses can extend
-5. **Unbounded Addresses**: No artificial memory limits
-6. **Hardware Friendly**: Easy to implement in digital circuits
-
-## Contribution Guidelines
-
-We welcome all forms of contribution:
-
-- **New Implementations**: Write interpreters in other languages
-- **Example Programs**: Create interesting BS programs
-- **Optimizations**: Improve performance or reduce code size
-- **Documentation**: Improve explanations and tutorials
-- **Tools**: Assemblers, debuggers, visualization tools
-
-## Project Structure
-
-```
-Bitwise-Subleq/
-├── README.md           # Chinese documentation
-├── README_EN.md        # This file (English)
-├── LICENSE             # License information
-└── Interpreter/        # Language implementations
-    └── Java/           # Java interpreter
-        ├── README.md   # Implementation docs (Chinese)
-        ├── README_EN.md # Implementation docs (English)
-        └── src/        # Source code
-```
+📖 Detailed Documentation: [Java Interpreter README](Interpreter/Java/README_EN.md)
 
 ## License
 
-This project is licensed under the GNU Affero General Public License v3.0 License - see the [LICENSE](LICENSE) file for details
-
-## Contact
-
-- **Issues**: Submit issues on GitHub
-- **Pull Requests**: Code contributions welcome
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
 
 ---
 
-**BS (Bitwise Subleq)** - Exploring the essence of computation, starting from 0 and 1.
+**© 2025 BS (Bitwise Subleq) Project**  
+By using this software, you agree to comply with all terms of the AGPLv3 license.
