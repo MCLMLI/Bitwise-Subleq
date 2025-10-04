@@ -3,6 +3,12 @@ import java.io.IOException;
 /**
  * BitReader 解析比特流并解码自终止地址
  * BitReader parses a bitstream and decodes self-terminating addresses.
+ *
+ * 新格式：每个地址段由6位组成：[dddd][s][l]
+ * New format: Each address segment consists of 6 bits: [dddd][s][l]
+ * - dddd: 4位数据位 / 4 data bits
+ * - s: 功能位 / function bit
+ * - l: 链接位 / link bit
  */
 public class BitReader {
     private final String bitstream;
@@ -36,20 +42,35 @@ public class BitReader {
     }
 
     /**
-     * 读取一个自终止地址段
-     * Read a self-terminating address segment.
-     *
-     * 返回解码后的地址值
-     * Returns the decoded address value.
-     *
-     * 特殊情况：如果所有段中的位都是 1，则返回 -1
-     * Special case: if all bits in segments are 1s, returns -1
+     * 地址解析结果
+     * Address parsing result
      */
-    public int readAddress() throws IOException {
+    public static class AddressResult {
+        public final int address;
+        public final boolean hasFunction;
+
+        public AddressResult(int address, boolean hasFunction) {
+            this.address = address;
+            this.hasFunction = hasFunction;
+        }
+    }
+
+    /**
+     * 读取一个自终止地址段（新格式）
+     * Read a self-terminating address segment (new format).
+     *
+     * 格式：[dddd][s][l]
+     * - s=0: 丢弃该段，不解析
+     * - s=1且l=0: 有效段，hasFunction=true
+     * - s=1且l=1: 错误，视为s=0处理
+     *
+     * 返回解码后的地址值和功能位状态
+     * Returns the decoded address value and function bit status.
+     */
+    public AddressResult readAddress() throws IOException {
         int address = 0;
-        boolean allOnes = true;
         int segmentCount = 0;
-        boolean hasData = false;
+        boolean hasFunction = false;
 
         while (true) {
             // 读取 4 位数据 / Read 4 data bits
@@ -67,49 +88,60 @@ public class BitReader {
                     }
                     // 部分段 - 剩余部分视为 0 并结束 / Partial segment - treat remaining as 0s and end
                     data = data << (4 - i);
-                    allOnes = false;
-                    hasData = true;
                     bitsRead = i;
-                    break;
+                    return new AddressResult(address, hasFunction);
                 }
                 data = (data << 1) | bit;
-                if (bit == 0) allOnes = false;
                 bitsRead++;
-                hasData = true;
+            }
+
+            // 读取功能位 / Read function bit
+            int functionBit = readBit();
+            if (functionBit == -1) {
+                // EOF - 视为地址结束 / EOF - treat as end of address
+                return new AddressResult(address, hasFunction);
             }
 
             // 读取链接位 / Read link bit
-            int link = readBit();
-            if (link == -1) {
-                // EOF - 视为地址结束 (链接位=0) / EOF - treat as end of address (link=0)
-                link = 0;
-            } else if (link == 0) {
-                allOnes = false;
+            int linkBit = readBit();
+            if (linkBit == -1) {
+                // EOF - 视为地址结束 / EOF - treat as end of address
+                return new AddressResult(address, hasFunction);
             }
 
-            // 累积地址 / Accumulate address
-            address = (address << 4) | data;
-            segmentCount++;
+            // 处理功能位逻辑
+            // Process function bit logic
+            if (functionBit == 0) {
+                // s=0: 丢弃该段，不解析 / s=0: discard this segment, don't parse
+                // 不累积数据，继续读取（如果有链接）
+                if (linkBit == 0) {
+                    // 链接位也是0，地址结束 / link bit is also 0, address ends
+                    break;
+                }
+                // 链接位为1，继续读取下一段 / link bit is 1, continue to next segment
+                continue;
+            } else {
+                // s=1: 检查链接位 / s=1: check link bit
+                if (linkBit == 1) {
+                    // 错误：s=1且l=1，视为s=0处理
+                    // Error: s=1 and l=1, treat as s=0
+                    if (segmentCount == 0) {
+                        // 如果这是第一段且出错，返回地址0
+                        return new AddressResult(0, false);
+                    }
+                    // 否则忽略该段，地址结束
+                    break;
+                }
 
-            // 检查链接位是否为 0（地址结束）或 EOF
-            // Check if link bit is 0 (end of address) or EOF
-            if (link == 0 || !hasMore()) {
-                break;
+                // s=1且l=0：有效段 / s=1 and l=0: valid segment
+                address = (address << 4) | data;
+                hasFunction = true;
+                segmentCount++;
+                break; // l=0，地址结束 / l=0, address ends
             }
         }
 
-        // 检测 -1：为简单起见，检查累积值是否等于所有可能的 1
-        // Detect -1: For simplicity, check if accumulated value equals all possible 1s
-        // 对于单个 5 位段 "11111"：数据=1111(15)，链接=1
-        // For single 5-bit segment "11111": data=1111(15), link=1
-        // 但如果所有段中都是 1，则为 -1
-        // But if we have all 1s in all segments, it's -1
-        if (allOnes && segmentCount == 1 && address == 15) {
-            // 单段，数据部分全为 1 且链接=1 / Single segment with all 1s in data part and link=1
-            return -1;
-        }
-
-        return address;
+        return new AddressResult(address, hasFunction);
     }
 
     /**

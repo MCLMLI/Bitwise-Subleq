@@ -7,19 +7,32 @@ import java.util.Map;
 /**
  * BS (Bitwise Subleq) 解释器
  * BS (Bitwise Subleq) Interpreter
+ *
+ * 新格式支持功能位：
+ * New format supports function bits:
+ * - a段功能位=1: 阻塞输入 / a function bit=1: blocking input
+ * - b段功能位=1: 输出 / b function bit=1: output
+ * - c段功能位=1: 停机 / c function bit=1: halt
  */
 public class BSInterpreter {
     private static class Instruction {
         int a, b, c;
-        Instruction(int a, int b, int c) {
+        boolean aFunc, bFunc, cFunc;
+
+        Instruction(int a, int b, int c, boolean aFunc, boolean bFunc, boolean cFunc) {
             this.a = a;
             this.b = b;
             this.c = c;
+            this.aFunc = aFunc;
+            this.bFunc = bFunc;
+            this.cFunc = cFunc;
         }
 
         @Override
         public String toString() {
-            return "a=" + a + ", b=" + b + ", c=" + c;
+            return "a=" + a + (aFunc ? "[IN]" : "") +
+                   ", b=" + b + (bFunc ? "[OUT]" : "") +
+                   ", c=" + c + (cFunc ? "[HALT]" : "");
         }
     }
 
@@ -50,25 +63,31 @@ public class BSInterpreter {
 
         while (reader.hasMore()) {
             try {
-                int a = reader.readAddress();
+                BitReader.AddressResult aResult = reader.readAddress();
                 if (!reader.hasMore()) {
                     if (debug) System.err.println(Lang.get(
-                        "警告：不完整的指令（只有 a=" + a + "）",
-                        "Warning: Incomplete instruction (only a=" + a + ")"
+                        "警告：不完整的指令（只有 a=" + aResult.address + "）",
+                        "Warning: Incomplete instruction (only a=" + aResult.address + ")"
                     ));
                     break;
                 }
-                int b = reader.readAddress();
-                if (!reader.hasMore()) {
-                    if (debug) System.err.println(Lang.get(
-                        "警告：不完整的指令（a=" + a + ", b=" + b + "）",
-                        "Warning: Incomplete instruction (a=" + a + ", b=" + b + ")"
-                    ));
-                    break;
-                }
-                int c = reader.readAddress();
 
-                Instruction instr = new Instruction(a, b, c);
+                BitReader.AddressResult bResult = reader.readAddress();
+                if (!reader.hasMore()) {
+                    if (debug) System.err.println(Lang.get(
+                        "警告：不完整的指令（a=" + aResult.address + ", b=" + bResult.address + "）",
+                        "Warning: Incomplete instruction (a=" + aResult.address + ", b=" + bResult.address + ")"
+                    ));
+                    break;
+                }
+
+                BitReader.AddressResult cResult = reader.readAddress();
+
+                Instruction instr = new Instruction(
+                    aResult.address, bResult.address, cResult.address,
+                    aResult.hasFunction, bResult.hasFunction, cResult.hasFunction
+                );
+
                 if (debug) System.err.println(Lang.get(
                     "已加载指令 " + program.size() + ": " + instr,
                     "Loaded instruction " + program.size() + ": " + instr
@@ -90,14 +109,11 @@ public class BSInterpreter {
     }
 
     private int readMem(int address) {
-        if (address == -1) return -1;
         return memory.getOrDefault(address, 0);
     }
 
     private void writeMem(int address, int value) {
-        if (address != -1) {
-            memory.put(address, value);
-        }
+        memory.put(address, value);
     }
 
     public void execute() throws IOException {
@@ -111,7 +127,7 @@ public class BSInterpreter {
                                  ", mem[" + instr.b + "]=" + readMem(instr.b));
             }
 
-            executeInstruction(instr.a, instr.b, instr.c);
+            executeInstruction(instr);
 
             if (instructionCount > 1000000) {
                 System.err.println("\n" + Lang.get(
@@ -128,52 +144,52 @@ public class BSInterpreter {
         ));
     }
 
-    private void executeInstruction(int a, int b, int c) throws IOException {
-        // I/O: 输入
-        if (a == -1 && b == -1) {
-            int input = System.in.read();
-            if (input == -1) input = 0;
-            memory.put(-2, input);
-            if (debug) System.err.println("  " + Lang.get(
-                "输入：读取字节 " + input,
-                "INPUT: read byte " + input
-            ));
-            pc++;
-            return;
-        }
-
-        // I/O: 输出
-        if (b == -1 && a != -1) {
-            int value = readMem(a);
-            System.out.write(value & 0xFF);
-            System.out.flush();
-            if (debug) System.err.println("  " + Lang.get(
-                "输出：写入字节 " + (value & 0xFF) + " ('" + (char)(value & 0xFF) + "')",
-                "OUTPUT: wrote byte " + (value & 0xFF) + " ('" + (char)(value & 0xFF) + "')"
-            ));
-            pc++;
-            return;
-        }
-
-        // 正常指令
-        int valA = readMem(a);
-        int valB = readMem(b);
-        int result = valB - valA;
-        writeMem(b, result);
-
-        if (debug) System.err.println("  mem[" + b + "] = " + valB + " - " + valA + " = " + result);
-
-        // 停机
-        if (c == -1 && result <= 0) {
-            if (debug) System.err.println("  " + Lang.get("停机", "HALT"));
+    private void executeInstruction(Instruction instr) throws IOException {
+        // 检查c段停机功能位 / Check c segment halt function bit
+        if (instr.cFunc) {
+            if (debug) System.err.println("  " + Lang.get("停机（c功能位）", "HALT (c function bit)"));
             halted = true;
             return;
         }
 
-        // 跳转或继续
+        // 检查a段输入功能位 / Check a segment input function bit
+        if (instr.aFunc) {
+            int input = System.in.read();
+            if (input == -1) input = 0;
+            writeMem(instr.a, input);
+            if (debug) System.err.println("  " + Lang.get(
+                "输入：读取字节 " + input + " 到地址 " + instr.a,
+                "INPUT: read byte " + input + " to address " + instr.a
+            ));
+            pc++;
+            return;
+        }
+
+        // 检查b段输出功能位 / Check b segment output function bit
+        if (instr.bFunc) {
+            int value = readMem(instr.b);
+            System.out.write(value & 0xFF);
+            System.out.flush();
+            if (debug) System.err.println("  " + Lang.get(
+                "输出：写入字节 " + (value & 0xFF) + " ('" + (char)(value & 0xFF) + "') 从地址 " + instr.b,
+                "OUTPUT: wrote byte " + (value & 0xFF) + " ('" + (char)(value & 0xFF) + "') from address " + instr.b
+            ));
+            pc++;
+            return;
+        }
+
+        // 正常Subleq指令 / Normal Subleq instruction
+        int valA = readMem(instr.a);
+        int valB = readMem(instr.b);
+        int result = valB - valA;
+        writeMem(instr.b, result);
+
+        if (debug) System.err.println("  mem[" + instr.b + "] = " + valB + " - " + valA + " = " + result);
+
+        // 跳转或继续 / Jump or continue
         if (result <= 0) {
-            if (debug) System.err.println("  " + Lang.get("跳转到 ", "JUMP to ") + c);
-            pc = c;
+            if (debug) System.err.println("  " + Lang.get("跳转到 ", "JUMP to ") + instr.c);
+            pc = instr.c;
         } else {
             if (debug) System.err.println("  " + Lang.get("继续到 ", "CONTINUE to ") + (pc + 1));
             pc++;

@@ -2,158 +2,127 @@
 
 English | [中文](README.md)
 
-Java implementation of the BS (Bitwise Subleq) interpreter.
+Java implementation of the BS (Bitwise Subleq) interpreter, supporting the new 6-bit encoding format (4 data bits + 1 function bit + 1 link bit).
 
 > 📖 **Full Language Specification**: See [Project Root README](../../README_EN.md)
 
 ## Quick Start
 
-### Option 1: Use Pre-built JAR (Recommended)
-
-Download the JAR file from [Releases](https://github.com/MCLMLI/Bitwise-Subleq/releases) and run directly:
+### Compile and Run from Source
 
 ```bash
-# Show help
-java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar --help
-
-# Execute program
-java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e 000000000000000
-
-# Run from file
-java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar program.bs
-
-# Debug mode
-java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -d -e 000000000000000
+cd Interpreter/Java/src/main/java
+javac -encoding UTF-8 *.java
+java BSMain -e "000010000010000010"    # Test halt instruction
 ```
 
-### Option 2: Build from Source
+### Usage Examples
 
 ```bash
-cd Interpreter/Java
-.\gradlew.bat build     # Windows
-./gradlew build         # Linux/Mac
+# Immediate halt (c segment function bit=1)
+java BSMain -e "000010000010000010"
 
-# Run
-java -jar build\libs\Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e <bitstream>
+# Debug mode with detailed information
+java BSMain -d -e "000010000010000010"
+
+# Run from file
+java BSMain program.bs
+
+# Input/output test (interactive)
+java BSMain -e "000110000110000010"
 ```
 
 ## Command Line Options
 
 ```
 Usage:
-  java -jar <jarfile> [options] <filename>
-  java -jar <jarfile> [options] -e <bitstream>
+  java BSMain [options] <filename>
+  java BSMain [options] -e <bitstream>
 
 Options:
   -h, --help              Show help message
-  --lang zh|en            Set interface language (default: zh)
+  --lang zh|en            Set interface language (default: system language)
   -e <bitstream>          Execute bitstream string directly
-  -d                      Enable debug mode (step-by-step)
+  -d                      Enable debug mode (show detailed execution)
   <filename>              Read and execute program from file
 ```
 
-## Usage Examples
+## New Encoding Format
 
-### Basic Usage
+Each address segment consists of 6 bits: `[dddd][s][l]`
+- **dddd**: 4 data bits
+- **s**: Function bit (0=discard, 1=valid)
+- **l**: Link bit (0=end, 1=continue)
 
-```bash
-# Infinite loop example
-java -jar bs-interpreter.jar -e 000000000000000
+### Function Bit Actions
 
-# Output test
-java -jar bs-interpreter.jar -e 100010000111111
+| Segment | Function bit=1 | Description |
+|---------|---------------|-------------|
+| a segment | Input | Read 1 byte from stdin to mem[a] |
+| b segment | Output | Output low 8 bits of mem[b] to stdout |
+| c segment | Halt | Immediately terminate program |
 
-# Run from file
-java -jar bs-interpreter.jar test_program.bs
+### Encoding Examples
+
+```
+000010 = 0000(data) 1(function) 0(link)
+         address=0, has function bit
+
+000110 = 0001(data) 1(function) 0(link)
+         address=1, has function bit
+
+010011 = 0100(data) 1(function) 1(link)
+         Error! s=1 and l=1, treated as invalid
 ```
 
-### Debug Mode
-
-```bash
-# Step-by-step execution with detailed information
-java -jar bs-interpreter.jar -d -e 000000000000000
-```
+## Debug Mode
 
 Debug mode displays:
-- Instruction decoding process
-- Memory state before and after execution
+- Instruction loading process and function bit status
+- Memory state before and after each instruction
 - Program counter changes
-- Waits for Enter key after each step
-
-### Language Support
+- Input/output operation details
 
 ```bash
-# Use English interface
-java -jar bs-interpreter.jar --lang en -e 000000000000000
-
-# Set language via environment variable
-set BS_LANG=en                           # Windows
-export BS_LANG=en                        # Linux/Mac
-java -jar bs-interpreter.jar -e 000000000000000
+java BSMain -d -e "000010000010000010"
 ```
 
-## Environment Variables
+Example output:
+```
+Loaded instruction 0: a=0[], b=0[], c=0[HALT]
+Loaded 1 instructions
+Starting execution of 1 instructions...
 
-| Variable | Value | Description |
-|----------|-------|-------------|
-| `BS_LANG` | `zh` / `en` | Set interface language (default: zh) |
-| `BS_DEBUG` | `1` | Enable verbose debug output |
-| `BS_VERBOSE` | `1` | Show execution statistics |
+PC=0, Instr: a=0, b=0, c=0[HALT]
+  Before: mem[0]=0, mem[0]=0
+  HALT (c function bit)
 
-## Features
+Execution finished. Total instructions: 1
+```
 
-- ✅ Full BS language support
-- ✅ Step-by-step debug mode
-- ✅ Bilingual interface (Chinese/English)
-- ✅ File and command line input
-- ✅ Detailed error messages
-- ✅ Execution statistics
-- ✅ Executable JAR file
+## Building JAR
 
-## Development Tools
-
-### Address Decoding Test Tool
-
-For understanding BS's self-terminating address encoding:
+To generate a standalone JAR file:
 
 ```bash
-java -cp build\classes\java\main TestDecoding
-java -cp build\classes\java\main TestDecoding --lang en
+cd Interpreter/Java
+.\gradlew.bat build     # Windows
+./gradlew build         # Linux/Mac
+
+# JAR file location
+build/libs/Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar
 ```
 
-## System Requirements
+## Technical Features
 
-- **Java**: 8 or higher
-- **Dependencies**: None
-- **Platform**: Windows / Linux / macOS
-
-## Project Structure
-
-```
-Interpreter/Java/
-├── src/main/java/
-│   ├── BitReader.java       # Bitstream parser interface
-│   ├── SimpleBitReader.java # 5-bit block parser implementation
-│   ├── BSInterpreter.java   # BS interpreter core
-│   ├── BSMain.java          # Command line entry point
-│   ├── Lang.java            # Multilingual support
-│   └── TestDecoding.java    # Address decoding test
-├── build.gradle             # Gradle build configuration
-├── README.md               # Chinese documentation
-└── README_EN.md            # This file
-```
-
-## FAQ
-
-**Q: Program doesn't stop?**  
-A: The program will automatically stop after 1,000,000 instructions. Use debug mode `-d` to observe execution flow.
-
-**Q: How to output characters?**  
-A: Use special address -1 as output target. See [Language Specification](../../README_EN.md) for details.
-
-**Q: Bitstream format error?**  
-A: Ensure input contains only 0s and 1s, and length is a multiple of 5.
+- ✅ New 6-bit encoding format support
+- ✅ Function bit mechanism (input/output/halt)
+- ✅ Sparse memory implementation (HashMap)
+- ✅ Detailed debug output
+- ✅ Bilingual support (Chinese/English)
+- ✅ Self-terminating address parsing
+- ✅ Error handling and validation
 
 ## License
 
-This project uses the same license as the main project. See [LICENSE](../../LICENSE) for details.
+MIT License - See [LICENSE](../../LICENSE) file in project root
