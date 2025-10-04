@@ -48,7 +48,7 @@ BS (Bitwise Subleq) 是一个基于 **单指令集架构 (OISC)** 的图灵完�
 ### 步骤 1：下载解释器
 
 1. 访问 [发布页面](https://github.com/MCLMLI/Bitwise-Subleq/releases)
-2. 下载 `Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar` 文件
+2. 下载 `Bitwise-Subleq-Interpreter-Java-1.0.jar` 文件
 3. 保存到你的电脑（任意文件夹）
 
 ### 步骤 2：安装 Java
@@ -64,21 +64,21 @@ BS (Bitwise Subleq) 是一个基于 **单指令集架构 (OISC)** 的图灵完�
 
 ```bash
 # 程序1：立即停止（最简单的程序）
-java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+java -jar Bitwise-Subleq-Interpreter-Java-1.0.jar -e "000010000010000010"
 ```
 
 **结果**：程序立即结束，什么都不做。
 
 ```bash
 # 程序2：回显（重复你输入的内容）
-echo ABC | java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000000000010000010000000000010000010000010"
+echo ABC | java -jar Bitwise-Subleq-Interpreter-Java-1.0.jar -e "000010000010000000000010000010000000000010000010000010"
 ```
 
 **结果**：屏幕显示 `ABC`
 
 🎉 **恭喜！你已经成功运行了 BS 程序！**
 
-> 💡 查看更多命令：`java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -h`
+> 💡 查看更多命令：`java -jar Bitwise-Subleq-Interpreter-Java-1.0.jar -h`
 
 ---
 
