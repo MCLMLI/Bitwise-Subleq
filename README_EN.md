@@ -1,6 +1,6 @@
 # BS (Bitwise Subleq)
 
-English | [**中文**](README.md)
+[**中文**](README.md) | English
 
 **A Minimalist Programming Language That Can Write Any Program Using Only 0 and 1**
 
