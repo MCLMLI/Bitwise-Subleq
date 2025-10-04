@@ -10,6 +10,10 @@ repositories {
 }
 
 dependencies {
+    // JNA for native API calls (unbuffered input)
+    implementation 'net.java.dev.jna:jna:5.13.0'
+    implementation 'net.java.dev.jna:jna-platform:5.13.0'
+
     testImplementation platform('org.junit:junit-bom:5.10.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -19,7 +23,7 @@ test {
     useJUnitPlatform()
 }
 
-// 配置 JAR 任务，使其可执行
+// 配置 JAR 任务，使其可执行并包含所有依赖（Fat JAR）
 jar {
     manifest {
         attributes(
@@ -29,4 +33,12 @@ jar {
             'Created-By': 'MCLMLI'
         )
     }
+
+    // 将所有依赖打包进 JAR
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+
+    // 避免重复文件冲突
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

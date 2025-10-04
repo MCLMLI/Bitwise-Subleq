@@ -9,6 +9,12 @@ import java.nio.file.Paths;
 public class BSMain {
 
     public static void main(String[] args) {
+        // 注册 shutdown hook 以恢复终端设置
+        // Register shutdown hook to restore terminal settings
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            UnbufferedInput.getInstance().restore();
+        }));
+
         // 检查语言设置（默认中文）
         String langEnv = System.getenv("BS_LANG");
         if (langEnv != null) {

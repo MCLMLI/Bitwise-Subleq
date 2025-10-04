@@ -42,6 +42,7 @@ public class BSInterpreter {
     private boolean halted;
     private int instructionCount;
     private boolean debug;
+    private final UnbufferedInput unbufferedInput;
 
     public BSInterpreter(String bitstream) throws IOException {
         this(bitstream, false);
@@ -54,6 +55,7 @@ public class BSInterpreter {
         this.halted = false;
         this.instructionCount = 0;
         this.debug = debug;
+        this.unbufferedInput = UnbufferedInput.getInstance();
 
         loadProgram(bitstream);
     }
@@ -152,7 +154,7 @@ public class BSInterpreter {
 
         // 1. 检查a段输入功能位 / Check a segment input function bit
         if (instr.aFunc) {
-            int input = System.in.read();
+            int input = unbufferedInput.readChar();
             if (input == -1) {
                 // EOF encountered - treat as 0 and set halt flag
                 input = 0;
