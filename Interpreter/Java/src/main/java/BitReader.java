@@ -6,9 +6,16 @@ import java.io.IOException;
  *
  * 新格式：每个地址段由6位组成：[dddd][s][l]
  * New format: Each address segment consists of 6 bits: [dddd][s][l]
- * - dddd: 4位数据位 / 4 data bits
- * - s: 功能位 / function bit
- * - l: 链接位 / link bit
+ * - dddd: 4位数据位（总是累积到地址） / 4 data bits (always accumulate to address)
+ * - s: 功能位（不作为数据，仅标记） / function bit (not data, only marker)
+ * - l: 链接位（不作为数据，控制是否继续） / link bit (not data, controls continuation)
+ *
+ * 解析规则：
+ * - s=0: 该段没有功能位标记
+ * - s=1且l=0: 该段有功能位标记，地址结束
+ * - s=1且l=1: 错误情况，视为s=0处理
+ * - l=0: 地址结束
+ * - l=1: 继续读取下一段
  */
 public class BitReader {
     private final String bitstream;
@@ -60,9 +67,12 @@ public class BitReader {
      * Read a self-terminating address segment (new format).
      *
      * 格式：[dddd][s][l]
-     * - s=0: 丢弃该段，不解析
-     * - s=1且l=0: 有效段，hasFunction=true
+     * - 数据位（dddd）总是累积到地址
+     * - s=0: 无功能位标记
+     * - s=1且l=0: 有功能位标记，地址结束
      * - s=1且l=1: 错误，视为s=0处理
+     * - l=0: 地址结束
+     * - l=1: 继续读取下一段（数据左移4位）
      *
      * 返回解码后的地址值和功能位状态
      * Returns the decoded address value and function bit status.
@@ -75,7 +85,6 @@ public class BitReader {
         while (true) {
             // 读取 4 位数据 / Read 4 data bits
             int data = 0;
-            int bitsRead = 0;
             for (int i = 0; i < 4; i++) {
                 int bit = readBit();
                 if (bit == -1) {
@@ -88,57 +97,49 @@ public class BitReader {
                     }
                     // 部分段 - 剩余部分视为 0 并结束 / Partial segment - treat remaining as 0s and end
                     data = data << (4 - i);
-                    bitsRead = i;
+                    address = (address << 4) | data;
                     return new AddressResult(address, hasFunction);
                 }
                 data = (data << 1) | bit;
-                bitsRead++;
             }
 
-            // 读取功能位 / Read function bit
+            // 读取功能位 / Read function bit (不作为数据)
             int functionBit = readBit();
             if (functionBit == -1) {
-                // EOF - 视为地址结束 / EOF - treat as end of address
+                // EOF - 累积数据并结束 / EOF - accumulate data and end
+                address = (address << 4) | data;
                 return new AddressResult(address, hasFunction);
             }
 
-            // 读取链接位 / Read link bit
+            // 读取链接位 / Read link bit (不作为数据)
             int linkBit = readBit();
             if (linkBit == -1) {
-                // EOF - 视为地址结束 / EOF - treat as end of address
+                // EOF - 累积数据并结束 / EOF - accumulate data and end
+                address = (address << 4) | data;
                 return new AddressResult(address, hasFunction);
             }
 
-            // 处理功能位逻辑
-            // Process function bit logic
-            if (functionBit == 0) {
-                // s=0: 丢弃该段，不解析 / s=0: discard this segment, don't parse
-                // 不累积数据，继续读取（如果有链接）
-                if (linkBit == 0) {
-                    // 链接位也是0，地址结束 / link bit is also 0, address ends
-                    break;
-                }
-                // 链接位为1，继续读取下一段 / link bit is 1, continue to next segment
-                continue;
-            } else {
-                // s=1: 检查链接位 / s=1: check link bit
-                if (linkBit == 1) {
-                    // 错误：s=1且l=1，视为s=0处理
-                    // Error: s=1 and l=1, treat as s=0
-                    if (segmentCount == 0) {
-                        // 如果这是第一段且出错，返回地址0
-                        return new AddressResult(0, false);
-                    }
-                    // 否则忽略该段，地址结束
-                    break;
-                }
+            // 累积数据位到地址 / Accumulate data bits to address
+            address = (address << 4) | data;
+            segmentCount++;
 
-                // s=1且l=0：有效段 / s=1 and l=0: valid segment
-                address = (address << 4) | data;
-                hasFunction = true;
-                segmentCount++;
-                break; // l=0，地址结束 / l=0, address ends
+            // 处理功能位逻辑 / Process function bit logic
+            if (functionBit == 1) {
+                if (linkBit == 0) {
+                    // s=1且l=0：有效的功能位标记 / s=1 and l=0: valid function bit marker
+                    hasFunction = true;
+                } else {
+                    // s=1且l=1：错误，视为s=0 / s=1 and l=1: error, treat as s=0
+                    // 不设置hasFunction，但仍然累积了数据
+                }
             }
+
+            // 检查链接位 / Check link bit
+            if (linkBit == 0) {
+                // l=0: 地址结束 / l=0: address ends
+                break;
+            }
+            // l=1: 继续读取下一段 / l=1: continue to next segment
         }
 
         return new AddressResult(address, hasFunction);

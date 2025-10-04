@@ -30,42 +30,58 @@ BS explores the question: "What is the absolute minimum required to implement co
 
 Each address consists of one or more 6-bit blocks: `[dddd][s][l]`
 
-- **dddd**: 4 data bits (most significant bit first)
-- **s**: Function bit
-- **l**: Link bit
+- **dddd**: 4 data bits (most significant bit first, **always accumulated to address**)
+- **s**: Function bit (**not data**, only a marker)
+- **l**: Link bit (**not data**, controls continuation)
 
 #### Parsing Rules:
 
-1. **s=0** (function bit is 0): Discard this segment, don't parse data
-   - If l=0: Address parsing ends
-   - If l=1: Continue reading next segment
+**Data Accumulation**:
+- The 4 data bits (dddd) of each segment are **always** parsed and accumulated to the address value
+- address = (address << 4) | data, continuously left-shifted and accumulated
 
-2. **s=1, l=0** (function bit is 1, link bit is 0): Valid segment
-   - Parse data bits and accumulate to address
-   - Address parsing ends
-   - This segment has function bit marker
+**Function Bit (s)**:
+- **s=0**: This segment has no function bit marker
+- **s=1 and l=0**: This segment has function bit marker (valid)
+- **s=1 and l=1**: Error condition, treated as s=0
 
-3. **s=1, l=1** (function bit is 1, link bit is 1): Error condition
-   - Treat as s=0 (discard this segment)
-   - Address parsing ends
+**Link Bit (l)**:
+- **l=0**: Address parsing ends
+- **l=1**: Continue reading next 6-bit block
 
 **Examples:**
 ```
+Bitstream: 000010
+           ↓
+Segment:   0000(data) 1(function) 0(link)
+
+Parsing:
+- Data bits 0000 = 0
+- Function bit s=1, link bit l=0 → has function, address ends
+- Result: address=0, hasFunction=true
+```
+
+```
 Bitstream: 000110 010010
            ↓       ↓
-Segment 1: 0001 s=1 l=0 (valid segment, address ends)
-Segment 2: Not read
+Seg1:      0001 s=1 l=0 (has function, address ends)
+Seg2:      Not read
 
-Result: address=0001₂ = 1₁₀, hasFunction=true
+Parsing:
+- Seg1: data=0001=1, s=1, l=0 → has function, ends
+- Result: address=1, hasFunction=true
 ```
 
 ```
-Bitstream: 010011 100110
+Bitstream: 000111 001110
            ↓       ↓
-Segment 1: 0100 s=1 l=1 (error! treat as s=0)
-Address parsing ends
+Seg1:      0001 s=1 l=1 (error! s=1 and l=1)
+Seg2:      0011 s=1 l=0 (has function)
 
-Result: address=0₁₀, hasFunction=false
+Parsing:
+- Seg1: data=0001=1 accumulated, s=1 but l=1→error, no function marker, continue
+- Seg2: data=0011=3 accumulated, s=1 and l=0→has function, ends
+- Result: address=(1<<4)|3=19, hasFunction=true
 ```
 
 ### 2. Instruction Format
@@ -102,7 +118,7 @@ else
 
 ### 3. Function Bit Special Operations
 
-Function bits provide I/O and control operations without relying on all-ones encoding:
+Function bits provide I/O and control operations without relying on special address values:
 
 | Segment | Behavior when function bit=1 | Description |
 |---------|------------------------------|-------------|
@@ -110,7 +126,7 @@ Function bits provide I/O and control operations without relying on all-ones enc
 | **b segment** | Output | Output contents (low 8 bits) of `mem[b]` address to stdout, then PC+1 |
 | **c segment** | Halt | Immediately terminate program execution |
 
-**Advantage:** No longer uses all-ones encoding (prone to misjudgment), but uses explicit function bit markers.
+**Advantage:** No longer relies on special address values (like all-ones), but uses explicit function bit markers, avoiding special reservations in the address space.
 
 ### 4. Memory Model
 
@@ -133,25 +149,36 @@ Function bits provide I/O and control operations without relying on all-ones enc
 ```
 000010 000010 000010
 #  a     b     c
+# a=0, b=0, c=0
 # c segment function bit=1, immediate halt
 ```
 
-#### Output Character
+#### Simple Output
 ```
-# Assume mem[5] already contains character 'A'(65)
-010110 000010 000010
-#  a=5   b=0   c=0
-#       out   halt
+# Assume mem[0] already contains character 'A'(65)
+000000 000010 000010
+# a=0(no function), b=0(output), c=0(halt)
 # b segment function bit=1: output mem[0]
 # c segment function bit=1: halt
 ```
 
-#### Input and Output
+#### Input and Echo
 ```
-000110 000110 000010
-# a function bit=1: input to mem[0]
-# b function bit=1: output mem[0]  
-# c function bit=1: halt
+000010 000010 000010
+# a=0(input), b=0(output), c=0(halt)
+# a segment function bit=1: input to mem[0]
+# b segment function bit=1: output mem[0]
+# c segment function bit=1: halt
+```
+
+#### Multi-segment Address Example
+```
+000111 001110 000010 000010
+# a segment: 0001 s=1 l=1 → continue
+#            0011 s=1 l=0 → address=19, has function (input)
+# b segment: 0000 s=1 l=0 → address=0, has function (output)
+# c segment: 0000 s=1 l=0 → address=0, has function (halt)
+# Function: input to mem[19], output mem[0], halt
 ```
 
 ## Implementations
@@ -205,9 +232,9 @@ For detailed usage, see [Java README](Interpreter/Java/README_EN.md).
 ## Technical Advantages
 
 1. **Minimal Parsing**: Only need to recognize 6-bit blocks
-2. **Self-Describing**: Address length determined by content
-3. **Function Bit Mechanism**: Avoids all-ones misjudgment problem
-4. **Compact Small Values**: Common addresses (0-15) only require 6 bits
+2. **Self-Describing**: Address length determined by link bits
+3. **Function Bit Mechanism**: Doesn't occupy address space, explicit operation markers
+4. **Compact Representation**: Small addresses use 6 bits, large addresses can extend
 5. **Unbounded Addresses**: No artificial memory limits
 6. **Hardware Friendly**: Easy to implement in digital circuits
 
