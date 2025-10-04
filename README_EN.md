@@ -1,6 +1,6 @@
 # BS (Bitwise Subleq)
 
-English | [中文](README.md)
+[中文](README.md) | English
 
 **A minimalist Turing-complete programming language using only binary encoding**
 

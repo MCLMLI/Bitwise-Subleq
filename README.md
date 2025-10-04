@@ -1,6 +1,6 @@
 # BS (Bitwise Subleq)
 
-[English](README_EN.md) | 中文
+中文 | [English](README_EN.md)
 
 **一种仅使用二进制编码的极简图灵完备编程语言**
 

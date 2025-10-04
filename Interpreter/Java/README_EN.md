@@ -1,6 +1,6 @@
 # BS Java Interpreter
 
-English | [中文](README.md)
+[中文](README.md) | English
 
 Java implementation of the BS (Bitwise Subleq) interpreter, supporting the new 6-bit encoding format (4 data bits + 1 function bit + 1 link bit).
 

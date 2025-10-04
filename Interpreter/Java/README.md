@@ -1,6 +1,6 @@
 # BS Java 解释器
 
-[English](README_EN.md) | 中文
+中文 | [English](README_EN.md) 
 
 Java 实现的 BS (Bitwise Subleq) 解释器，支持新的6位编码格式（4位数据 + 1位功能位 + 1位链接位）。
 
