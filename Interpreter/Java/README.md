@@ -10,7 +10,7 @@ Java 实现的 BS (Bitwise Subleq) 解释器，支持新的6位编码格式（4�
 
 ### 📦 推荐方式：使用预编译的JAR文件
 
-从 [Releases](https://github.com/your-username/Bitwise-Subleq/releases) 页面下载最新版本的 JAR 文件。
+从 [Releases](https://github.com/MCLMLI/Bitwise-Subleq/releases) 页面下载最新版本的 JAR 文件。
 
 ```bash
 # 下载后直接运行

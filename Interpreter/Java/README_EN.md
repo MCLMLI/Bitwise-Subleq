@@ -10,7 +10,7 @@ Java implementation of the BS (Bitwise Subleq) interpreter, supporting the new 6
 
 ### 📦 Recommended: Use Pre-compiled JAR File
 
-Download the latest JAR file from the [Releases](https://github.com/your-username/Bitwise-Subleq/releases) page.
+Download the latest JAR file from the [Releases](https://github.com/MCLMLI/Bitwise-Subleq/releases) page.
 
 ```bash
 # Run directly after download

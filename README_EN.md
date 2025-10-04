@@ -196,7 +196,7 @@ We provide a fully functional Java interpreter implementation.
 
 📦 **Recommended: Use Pre-compiled Version**
 
-Download the latest `Bitwise-Subleq-Interpreter-Java-x.x.x.jar` from the [Releases](https://github.com/your-username/Bitwise-Subleq/releases) page.
+Download the latest `Bitwise-Subleq-Interpreter-Java-x.x.x.jar` from the [Releases](https://github.com/MCLMLI/Bitwise-Subleq/releases) page.
 
 ```bash
 # Run directly after download

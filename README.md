@@ -196,7 +196,7 @@ else
 
 📦 **推荐：使用预编译版本**
 
-从 [Releases](https://github.com/your-username/Bitwise-Subleq/releases) 页面下载最新的 `Bitwise-Subleq-Interpreter-Java-x.x.x.jar`
+从 [Releases](https://github.com/MCLMLI/Bitwise-Subleq/releases) 页面下载最新的 `Bitwise-Subleq-Interpreter-Java-x.x.x.jar`
 
 ```bash
 # 下载后直接运行
