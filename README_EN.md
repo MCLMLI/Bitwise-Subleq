@@ -101,27 +101,41 @@ Instruction = [address_a][address_b][address_c]
 
 **Execution Semantics:**
 ```
-// First check function bits
-if (c segment function bit == 1)
-    halt and exit
+// Within the same instruction, check and execute all function bits in sequence
+// Note: All function bit operations are completed within the same instruction, no return in between
 
+// 1. Check a segment function bit (input)
 if (a segment function bit == 1)
     read 1 byte from input → mem[a]
-    PC = PC + 1
-    return
+    // Continue to check subsequent function bits
 
+// 2. Check b segment function bit (output)
 if (b segment function bit == 1)
     output low 8 bits of mem[b]
-    PC = PC + 1
+    // Continue to check subsequent function bits
+
+// 3. Check c segment function bit (halt)
+if (c segment function bit == 1)
+    halt and exit
     return
 
-// Normal Subleq instruction
+// 4. If any function bit was triggered
+if (a segment function bit == 1 || b segment function bit == 1 || c segment function bit == 1)
+    PC = PC + 1
+    return  // Do not execute Subleq instruction
+
+// 5. Otherwise execute normal Subleq instruction
 mem[b] = mem[b] - mem[a]
 if (mem[b] <= 0)
     PC = c
 else
-    PC = next instruction
+    PC = PC + 1
 ```
+
+**Important Notes:**
+- Within the same instruction, function bits of a, b, c segments will **all be executed in sequence** (if set)
+- For example: `000010 000010 000000` will first input to mem[0], then immediately output mem[0], finally PC+1
+- As long as any function bit is triggered, the normal Subleq subtraction operation will not be executed
 
 ### 3. Function Bit Special Operations
 
