@@ -264,7 +264,6 @@ Output: 1
 **Summary:**
 - BS language input operations are **blocking byte stream reads**, this is standard behavior
 - Input appears "merged" due to **line buffering**, not a bug
-- If you need true "character-by-character interaction", you need special terminal mode (raw mode), which is beyond standard BS language specification
 
 #### Multi-segment Address Example
 ```
