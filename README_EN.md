@@ -9,9 +9,9 @@ English | [**中文**](README.md)
 ## 📚 Table of Contents
 
 - [What is BS?](#what-is-bs)
-- [Quick Start (5 Minutes)](#quick-start-5-minutes)
-- [Understanding BS Language](#understanding-bs-language)
-- [Complete Language Specification](#complete-language-specification)
+- [Quick Start (5 Minutes) - For Beginners](#quick-start-5-minutes)
+- [Understanding BS Language - For Intermediate Users](#understanding-bs-language)
+- [Complete Language Specification - For Advanced Users](#complete-language-specification)
 - [Frequently Asked Questions](#frequently-asked-questions)
 - [License](#license)
 
@@ -48,7 +48,7 @@ This is an experimental language for studying the **essence of computation**, pr
 ### Step 1: Download the Interpreter
 
 1. Visit the [Releases Page](https://github.com/MCLMLI/Bitwise-Subleq/releases)
-2. Download the `Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar` file
+2. Download the `Bitwise-Subleq-Interpreter-Java-1.0.jar` file
 3. Save it to your computer (any folder)
 
 ### Step 2: Install Java
@@ -64,21 +64,21 @@ Open command line (Windows: press `Win+R` and type `cmd`, Mac/Linux: open Termin
 
 ```bash
 # Program 1: Immediate halt (simplest program)
-java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000010"
+java -jar Bitwise-Subleq-Interpreter-Java-1.0.jar -e "000010000010000010"
 ```
 
 **Result**: Program ends immediately, doing nothing.
 
 ```bash
 # Program 2: Echo (repeat your input)
-echo ABC | java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -e "000010000010000000000010000010000000000010000010000010"
+echo ABC | java -jar Bitwise-Subleq-Interpreter-Java-1.0.jar -e "000010000010000000000010000010000000000010000010000010"
 ```
 
 **Result**: Screen displays `ABC`
 
 🎉 **Congratulations! You've successfully run a BS program!**
 
-> 💡 See more commands: `java -jar Bitwise-Subleq-Interpreter-Java-1.0-SNAPSHOT.jar -h`
+> 💡 See more commands: `java -jar Bitwise-Subleq-Interpreter-Java-1.0.jar -h`
 
 ---
 
@@ -103,7 +103,7 @@ These three segments together form one **instruction**.
 Each segment is 6 bits (6 zeros or ones), divided into three parts:
 
 ```
-0 0 0 0 | 1 | 0
+0 0 0 0    1     0
 └─data─┘ └func┘ └link┘
   4 bits  1 bit  1 bit
 ```
@@ -207,7 +207,7 @@ ABC
 If you need to access larger addresses (beyond 15), you can use the **link bit** to connect multiple 6-bit blocks:
 
 ```
-000111 001110
+000111  001110
 └─block1┘ └─block2┘
 ```
 
@@ -222,6 +222,8 @@ If you need to access larger addresses (beyond 15), you can use the **link bit**
 - Link `0` = End
 
 **Final address** = (1 × 16) + 3 = **19**
+
+**Effect**: Writes the input character to memory at address **19**
 
 > 📖 **Rule**: When function bit=1 AND link bit=1, it's an error condition, treated as function bit=0, but data still accumulates.
 
@@ -485,27 +487,7 @@ Assuming address 0 already contains ASCII value 72 (letter 'H'):
 
 ## Frequently Asked Questions
 
-### Q1: Why does input appear "merged"?
-
-**Problem Description**:
-```bash
-$ java -jar interpreter.jar program.bs
-123[Enter]
-Output: 123
-```
-Expected to pause 3 times, but read everything at once.
-
-**Reason**: This is the terminal's **line buffering** characteristic, not a bug.
-
-When you type `123` and press Enter, the entire line `"123\n"` enters the buffer. The program's 3 read() calls sequentially retrieve `'1'`, `'2'`, `'3'` from the buffer without pausing mid-way.
-
-**Solution**:
-```bash
-# Use pipe to provide input all at once
-echo 123 | java -jar interpreter.jar program.bs
-```
-
-### Q2: Can BS really write any program?
+### Q1: Can BS really write any program?
 
 **Answer**: Theoretically yes!
 
@@ -518,7 +500,7 @@ BS is based on the **Subleq** instruction, a mathematically proven **Turing-comp
 
 But actually writing them would be **extremely complex**, because you only have subtraction and jump operations.
 
-### Q3: What's the practical use of BS?
+### Q2: What's the practical use of BS?
 
 **Main Uses**:
 
@@ -539,7 +521,7 @@ But actually writing them would be **extremely complex**, because you only have 
 4. **Art**: Code as art
    - Creating complex systems from simplest elements
 
-### Q4: How to write complex BS programs?
+### Q3: How to write complex BS programs?
 
 **Direct hand-writing**: Nearly impossible ❌
 
@@ -568,14 +550,14 @@ But actually writing them would be **extremely complex**, because you only have 
 
 **Contributions of tools to this project are welcome!**
 
-### Q5: Why is it called "Bitwise Subleq"?
+### Q4: Why is it called "Bitwise Subleq"?
 
 - **Bitwise**: Because programs are pure binary bitstreams
 - **Subleq**: Subtract and branch if Less than or Equal
 
 The name directly describes the two major characteristics of the language.
 
-### Q6: How does it compare to other Esoteric languages?
+### Q5: How does it compare to other Esoteric languages?
 
 | Language | Character Set | Instructions | Features |
 |----------|--------------|-------------|----------|
@@ -595,7 +577,7 @@ This project is licensed under **[GNU Affero General Public License v3.0 (AGPL-3
 ### Simple Explanation
 
 ✅ **You Can**:
-- Use, learn, modify for free
+- Use, study, modify for free
 - Use in personal or commercial projects
 - Distribute your modified version
 
@@ -662,12 +644,18 @@ Or directly [create an Issue](https://github.com/MCLMLI/Bitwise-Subleq/issues) t
 
 Thanks to everyone who has contributed to this project!
 
-**Author**: MCLMLI  
-**Project Started**: 2025  
-**Current Version**: 1.0
-
 ---
 
 <div align="center">
 
 ### ⭐ If you find this project interesting, please give it a Star!
+
+**Let more people discover the charm of BS language**
+
+---
+
+Made with ❤️ by curious minds
+
+*Explore the essence of computation, experience the purity of programming*
+
+</div>
